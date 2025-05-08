@@ -7,7 +7,7 @@ from models.gpt import call_gpt
 from models.deepseek import call_deepseek
 import json
 import os
-
+st.warning("HF_TOKEN 前缀检查：" + (os.getenv("HF_TOKEN")[:10] if os.getenv("HF_TOKEN") else "❌ 没有读取到"))
 st.set_page_config(page_title="多模型中文写作助手", layout="wide")
 st.title("📝 多模型中文写作助手")
 
