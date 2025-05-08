@@ -4,7 +4,7 @@ import os
 API_URL = "https://api-inference.huggingface.co/models/deepseek-ai/deepseek-llm-7b-chat"
 headers = {"Authorization": f"Bearer {os.getenv('HF_TOKEN')}"}
 
-def call_deepseekllm7bchat(prompt: str) -> str:
+def call_deepseek(prompt: str) -> str:
     payload = {"inputs": prompt, "parameters": {"max_new_tokens": 512, "temperature": 0.7}}
     try:
         response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
