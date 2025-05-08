@@ -1,3 +1,4 @@
+
 import streamlit as st
 from models.chatglm import call_chatglm
 from models.qwen import call_qwen
@@ -5,9 +6,6 @@ from models.baichuan import call_baichuan
 from models.yi import call_yi
 from models.gpt import call_gpt
 from models.deepseek import call_deepseek
-import io
-from docx import Document
-from fpdf import FPDF
 import json
 import os
 
@@ -18,10 +16,7 @@ st.markdown("""
 输入提纲后，将同时调用多个中文大模型生成写作内容，供你比对选择。
 """)
 
-# Prompt 模板选择
 prompt_template = st.selectbox("📋 选择写作模板：", ["通用", "学术论文", "工作汇报", "心得总结"], index=0)
-
-# 模板文本微调
 custom_prefix = st.text_area("✏️ 可选：自定义提示词前缀（留空则使用模板默认）")
 
 template_prefix = {
@@ -31,26 +26,18 @@ template_prefix = {
     "心得总结": "请根据以下提纲，生成一段个人心得总结类型的内容："
 }
 
-# 用户输入
 topic = st.text_area("✍️ 请输入写作提纲：", height=200)
 
-# 模型选择
 models_selected = st.multiselect(
     "🧠 选择要调用的大模型：",
     ["ChatGLM", "Qwen", "Baichuan", "Yi", "DeepSeek", "GPT"],
     default=["ChatGLM", "Qwen", "DeepSeek"]
 )
 
-# GPT 模型细选（默认3.5）
 gpt_model = "gpt-3.5-turbo"
 if "GPT" in models_selected:
-    gpt_model = st.radio(
-        "⚙️ 选择 GPT 模型版本（仅当选中 GPT 时生效）",
-        ["gpt-3.5-turbo", "gpt-4o"],
-        horizontal=True
-    )
+    gpt_model = st.radio("⚙️ GPT 版本：", ["gpt-3.5-turbo", "gpt-4o"], horizontal=True)
 
-# 历史记录载入
 history_file = "history.json"
 history = []
 if os.path.exists(history_file):
@@ -95,39 +82,6 @@ if st.button("🚀 开始生成") and topic.strip():
     for model, content in results.items():
         st.subheader(f"📌 {model} 输出结果")
         st.write(content)
-        st.download_button(label=f"📥 下载 {model} 结果", file_name=f"{model}_output.txt", data=content)
-
-    def generate_doc(results):
-        doc = Document()
-        doc.add_heading("多模型写作输出结果", 0)
-        for model, content in results.items():
-            doc.add_heading(model, level=1)
-            doc.add_paragraph(content)
-        buffer = io.BytesIO()
-        doc.save(buffer)
-        buffer.seek(0)
-        return buffer
-
-    def generate_pdf(results):
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", size=12)
-        pdf.cell(200, 10, txt="多模型写作输出结果", ln=True, align="C")
-        for model, content in results.items():
-            pdf.set_font("Arial", size=12, style="B")
-            pdf.cell(200, 10, txt=model, ln=True)
-            pdf.set_font("Arial", size=12, style="")
-            for line in content.split("\n"):
-                pdf.multi_cell(0, 10, line)
-        buffer = io.BytesIO()
-        pdf.output(buffer)
-        buffer.seek(0)
-        return buffer
-
-    word_file = generate_doc(results)
-    pdf_file = generate_pdf(results)
-    st.download_button("📄 下载合并 Word 文件", data=word_file, file_name="写作助手输出.docx")
-    st.download_button("🧾 下载合并 PDF 文件", data=pdf_file, file_name="写作助手输出.pdf")
 
     history.append({
         "prompt": full_prompt,
@@ -136,8 +90,6 @@ if st.button("🚀 开始生成") and topic.strip():
     })
     with open(history_file, "w", encoding="utf-8") as f:
         json.dump(history, f, ensure_ascii=False, indent=2)
-
     st.success("✅ 写作完成，历史记录已保存。")
 else:
     st.caption("请先输入提纲并选择至少一个模型。")
-
