@@ -4,7 +4,7 @@ import os
 API_URL = "https://api-inference.huggingface.co/models/THUDM/chatglm3-6b"
 headers = {"Authorization": f"Bearer {os.getenv('HF_TOKEN')}"}
 
-def call_chatglm36b(prompt: str) -> str:
+def call_chatglm(prompt: str) -> str:
     payload = {"inputs": prompt, "parameters": {"max_new_tokens": 512, "temperature": 0.7}}
     try:
         response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
