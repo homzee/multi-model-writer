@@ -7,8 +7,9 @@ from models.gpt import call_gpt
 from models.deepseek import call_deepseek
 import json
 import os
-st.warning("HF_TOKEN 前缀检查：" + (os.getenv("HF_TOKEN")[:10] if os.getenv("HF_TOKEN") else "❌ 没有读取到"))
+
 st.set_page_config(page_title="多模型中文写作助手", layout="wide")
+st.warning("HF_TOKEN 前缀检查：" + (os.getenv("HF_TOKEN")[:10] if os.getenv("HF_TOKEN") else "❌ 没有读取到"))
 st.title("📝 多模型中文写作助手")
 
 st.markdown("""输入提纲后，将同时调用多个中文大模型生成写作内容，供你比对选择。""")
