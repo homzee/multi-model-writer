@@ -1,4 +1,3 @@
-
 import streamlit as st
 from models.chatglm import call_chatglm
 from models.qwen import call_qwen
@@ -21,6 +20,8 @@ if "custom_prefix" not in st.session_state:
     st.session_state.custom_prefix = ""
 if "prompt_template" not in st.session_state:
     st.session_state.prompt_template = "通用"
+if "force_generate" not in st.session_state:
+    st.session_state.force_generate = False
 
 template_prefix = {
     "通用": "请根据以下提纲生成一段连贯的中文内容：",
@@ -30,7 +31,11 @@ template_prefix = {
 }
 
 # UI 控件
-st.session_state.prompt_template = st.selectbox("📋 选择写作模板：", list(template_prefix.keys()), index=list(template_prefix.keys()).index(st.session_state.prompt_template))
+st.session_state.prompt_template = st.selectbox(
+    "📋 选择写作模板：",
+    list(template_prefix.keys()),
+    index=list(template_prefix.keys()).index(st.session_state.prompt_template)
+)
 st.session_state.custom_prefix = st.text_area("✏️ 可选：自定义提示词前缀（留空则使用模板默认）", value=st.session_state.custom_prefix)
 st.session_state.topic = st.text_area("✍️ 请输入写作提纲：", height=200, value=st.session_state.topic)
 
@@ -61,9 +66,15 @@ if history:
                 st.session_state.topic = record['prompt'].split("\n", 1)[-1]
                 st.session_state.custom_prefix = record['prompt'].split("\n", 1)[0]
                 st.session_state.prompt_template = record['template']
-                st.experimental_rerun()
+                st.session_state.force_generate = True
+
 else:
     st.info("暂无历史记录。")
+
+# 提前触发生成（如来自历史记录）
+if st.session_state.force_generate:
+    st.session_state.force_generate = False
+    st.experimental_rerun()
 
 # 生成按钮
 if st.button("🚀 开始生成") and st.session_state.topic.strip():
@@ -101,6 +112,7 @@ if st.button("🚀 开始生成") and st.session_state.topic.strip():
     })
     with open(history_file, "w", encoding="utf-8") as f:
         json.dump(history, f, ensure_ascii=False, indent=2)
+
     st.success("✅ 写作完成，历史记录已保存。")
 else:
     st.caption("请先输入提纲并选择模型")
