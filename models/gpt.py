@@ -1,14 +1,13 @@
-import openai
 import os
-
-openai.api_key = os.getenv("OPENAI_API_KEY") or "sk-你的key"
+from openai import OpenAI
 
 def call_gpt(prompt: str, model: str = "gpt-3.5-turbo", return_usage=False):
     try:
-        response = openai.ChatCompletion.create(
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        response = client.chat.completions.create(
             model=model,
             messages=[
-                {"role": "system", "content": "你是一位擅长中文写作的助手"},
+                {"role": "system", "content": "你是一位中文写作助手"},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
